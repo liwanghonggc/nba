@@ -1,6 +1,9 @@
 ##1、索引相关
 ####1.1、 创建索引
-
+```
+https://www.elastic.co/guide/en/elasticsearch/client/java-rest/5.6/java-rest-high-search.html
+https://www.cnblogs.com/ginb/p/8716485.html
+```
 ```
 put localhost:9200/nba
 ```
@@ -1981,4 +1984,18 @@ routing是⼀个可变值,默认是⽂档的_id ,也可以设置成⼀个⾃定�
 ```
 查看文档在哪个分片上
 GET /nba/_search_shards?routing=id
+```
+
+##11、Java API之RestHighLevelClient
+```
+1) 官网文档
+
+
+```
+```
+   
+2、注意事项
+1) client版本号 <= es版本号,最好保持一致,client版本号最后更新
+2) high-level-client底层使用low-level-client实现,low-level-client维护了一个连接池和一些线程,所以使用完
+   毕之后要使用client.close()关闭
 ```
