@@ -1999,3 +1999,82 @@ GET /nba/_search_shards?routing=id
 2) high-level-client底层使用low-level-client实现,low-level-client维护了一个连接池和一些线程,所以使用完
    毕之后要使用client.close()关闭
 ```
+
+##12、大众点评ES实战
+```
+1) and、or
+
+match后面的title会被分成4个单词(Standard分词器), 搜索时是or, 只要有一个满足就会搜索出来, 等价于下面operator or
+get /movie/_search
+{
+  "query": {
+    "match": {"title": "basketball with cartoom aliens"}
+  }
+}
+
+get /movie/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "basketball with cartoom aliens",
+        "operator": "or"
+      }
+    }
+  }
+}
+
+and方式要求4个分出来的词都满足
+get /movie/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "basketball with cartoom aliens",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+minimum_should_match: 最小词匹配项, 分出来的3个词至少匹配到2个
+get /movie/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "basketball love aliens",
+        "operator": "or",
+        "minimum_should_match": 2
+      }
+    }
+  }
+}
+```
+```
+2) 放大系数
+
+优化多字段查询, 认为title字段上出现query中的词重要性高, 可以加一个boost放大系数
+ES会计算一个文档在title字段和overview字段的上的得分, 默认是取两者中大的
+get /movie/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoom aliens",
+      "fields": ["title^10", "overview"]
+    }
+  }
+}
+
+使用tie_breaker方式: 效果是大的分值 + 0.3 * 较小的分值
+get /movie/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "basketball with cartoom aliens",
+      "fields": ["title^10", "overview"],
+      "tie_breaker": 0.3
+    }
+  }
+}
+```
